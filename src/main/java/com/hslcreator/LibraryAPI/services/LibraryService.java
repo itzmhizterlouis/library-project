@@ -45,7 +45,6 @@ public class LibraryService {
         Book book = Book.builder()
                 .name(bookDto.getName().toUpperCase())
                 .about(bookDto.getAbout().toLowerCase())
-                .imageUrl(bookDto.getImageUrl())
                 .author(bookDto.getAuthor().toUpperCase())
                 .build();
 
