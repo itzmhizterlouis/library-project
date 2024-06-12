@@ -28,6 +28,7 @@ public class SecurityConfig {
         String[] publicApis = {
                 "/authentication/**",
                 "/swagger-ui/**",
+                "/v3/api-docs/**",
         };
         return web -> web.ignoring().requestMatchers(publicApis);
     }
