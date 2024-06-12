@@ -154,4 +154,13 @@ public class LibraryService {
         return GenericResponse.builder()
                 .message("Due date has been successfully approved").build();
     }
+
+    @Transactional
+    public GenericResponse deleteBookRequest(int bookRequestId) {
+
+        bookRequestRepository.deleteByBookRequestId(bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new).getBookRequestId());
+
+        return GenericResponse.builder()
+                .message("Book Request has been successfully deleted").build();
+    }
 }

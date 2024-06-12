@@ -96,4 +96,11 @@ public class LibraryController {
 
         return libraryService.getBookRequestById(bookRequestId);
     }
+
+    @Operation(summary = "Delete Book Request", description = "Mostly used by users to delete book request")
+    @DeleteMapping("books/requests/{bookRequestId}")
+    public GenericResponse deleteBookRequest(@PathVariable int bookRequestId) {
+
+        return libraryService.deleteBookRequest(bookRequestId);
+    }
 }
