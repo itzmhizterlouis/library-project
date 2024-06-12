@@ -38,7 +38,7 @@ public class LibraryService {
     private final BookDepartmentRepository bookDepartmentRepository;
     private final BookRequestRepository bookRequestRepository;
 
-    public GenericResponse uploadBook(BookDto bookDto) throws UnauthorizedException {
+    public BookResponse uploadBook(BookDto bookDto) throws UnauthorizedException {
 
         throwErrorIfUserNotAdmin();
 
@@ -57,8 +57,7 @@ public class LibraryService {
                         .build()
                 ));
 
-        return GenericResponse.builder()
-                .message("Book has been successfully added").build();
+        return book.toDto();
     }
 
     public BookResponse getBookById(int id) throws BookNotFoundException {
@@ -144,7 +143,9 @@ public class LibraryService {
         return bookRequestRepository.findAllByStatus(ApprovalStatus.NULL);
     }
 
-    public GenericResponse approveDueDate(int bookRequestId, ApprovalStatus approvalStatus) {
+    public GenericResponse approveDueDate(int bookRequestId, ApprovalStatus approvalStatus) throws UnauthorizedException {
+
+        throwErrorIfUserNotAdmin();
 
         BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
         bookRequest.setStatus(approvalStatus);

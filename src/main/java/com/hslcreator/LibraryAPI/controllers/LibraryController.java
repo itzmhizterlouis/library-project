@@ -13,6 +13,7 @@ import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
 import com.hslcreator.LibraryAPI.models.responses.BookResponse;
 import com.hslcreator.LibraryAPI.models.responses.GenericResponse;
 import com.hslcreator.LibraryAPI.services.LibraryService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,54 +34,63 @@ public class LibraryController {
 
     private final LibraryService libraryService;
 
+    @Operation(summary = "Upload book", description = "(Admin)Returns a validated jwt token that can be used to log in")
     @PostMapping("books")
-    public GenericResponse uploadBook(@RequestBody BookDto bookDto) throws UnauthorizedException {
+    public BookResponse uploadBook(@RequestBody BookDto bookDto) throws UnauthorizedException {
 
         return libraryService.uploadBook(bookDto);
     }
 
+    @Operation(summary = "Get Book by id", description = "Get Book by book id")
     @GetMapping("books/{id}")
     public BookResponse getBookById(@PathVariable int id) throws BookNotFoundException {
 
         return libraryService.getBookById(id);
     }
 
+    @Operation(summary = "Find All Books for Department", description = "Find all books for specific department")
     @GetMapping("books/all/{dept}")
     public Set<BookResponse> findAllBooksForDepartment(@PathVariable Department dept) throws BookNotFoundException {
 
         return libraryService.findAllBooksForDepartment(dept);
     }
 
+    @Operation(summary = "Delete Book", description = "(Admin)Delete Book by book id")
     @DeleteMapping("books/{id}")
     public boolean deleteBook(@PathVariable int id) throws UnauthorizedException {
 
         return libraryService.deleteBook(id);
     }
 
+    @Operation(summary = "Request to borrow/reserve book", description = "Endpoint for requesting to borrow book")
     @PostMapping("books/request/{bookId}")
     public BookRequestResponse requestBook(@PathVariable int bookId, @RequestBody BorrowBookRequest request) {
 
         return libraryService.requestToBorrowBook(bookId, request);
     }
 
+    @Operation(summary = "Change Due Date Request", description = "Endpoint for requesting to change due date (admin has to approve after)")
     @PutMapping("books/requests/change-due-date/{bookRequestId}")
     public GenericResponse changeDueDate(@PathVariable int bookRequestId, @RequestBody ChangeDateRequest changeDateRequest) {
 
         return libraryService.changeDueDate(bookRequestId, changeDateRequest);
     }
 
+    @Operation(summary = "Get All Book Requests User", description = "(Admin)Returns a list of all requests for book whether reserve or borrow(Admin)")
     @GetMapping("books/requests")
-    public List<BookRequest> getAllBookRequests() throws UnauthorizedException {
+    public List<BookRequest> getAllChangeDueDateRequests() throws UnauthorizedException {
 
         return libraryService.getAllBookRequests();
     }
 
+    @Operation(summary = "Approve Due Date User", description = "(Admin) can only approve due date")
     @PutMapping("books/requests/{bookRequestId}/approve-due-date")
-    public GenericResponse approveDueDate(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) {
+    public GenericResponse approveDueDate(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) throws UnauthorizedException {
 
         return libraryService.approveDueDate(bookRequestId, approvalStatusRequest.getApprovalStatus());
     }
 
+    @Operation(summary = "Get Book Request by Book Request Id", description = "(Admin)Get book request by book request id")
     @GetMapping("books/requests/{bookRequestId}")
     public BookRequest getBookRequestById(@PathVariable int bookRequestId) throws UnauthorizedException {
 
