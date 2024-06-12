@@ -8,6 +8,8 @@ import com.hslcreator.LibraryAPI.models.entities.Department;
 import com.hslcreator.LibraryAPI.models.requests.ApprovalStatusRequest;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
+import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
+import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
 import com.hslcreator.LibraryAPI.models.responses.BookResponse;
 import com.hslcreator.LibraryAPI.models.responses.GenericResponse;
 import com.hslcreator.LibraryAPI.services.LibraryService;
@@ -56,9 +58,15 @@ public class LibraryController {
     }
 
     @PostMapping("books/request/{bookId}")
-    public GenericResponse requestBook(@PathVariable int bookId, @RequestBody BorrowBookRequest request) {
+    public BookRequestResponse requestBook(@PathVariable int bookId, @RequestBody BorrowBookRequest request) {
 
         return libraryService.requestToBorrowBook(bookId, request);
+    }
+
+    @PutMapping("books/requests/change-due-date/{bookRequestId}")
+    public GenericResponse changeDueDate(@PathVariable int bookRequestId, @RequestBody ChangeDateRequest changeDateRequest) {
+
+        return libraryService.changeDueDate(bookRequestId, changeDateRequest);
     }
 
     @GetMapping("books/requests")
@@ -67,15 +75,15 @@ public class LibraryController {
         return libraryService.getAllBookRequests();
     }
 
+    @PutMapping("books/requests/{bookRequestId}/approve-due-date")
+    public GenericResponse approveDueDate(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) {
+
+        return libraryService.approveDueDate(bookRequestId, approvalStatusRequest.getApprovalStatus());
+    }
+
     @GetMapping("books/requests/{bookRequestId}")
     public BookRequest getBookRequestById(@PathVariable int bookRequestId) throws UnauthorizedException {
 
         return libraryService.getBookRequestById(bookRequestId);
-    }
-
-    @PutMapping("books/requests/{bookRequestId}")
-    public GenericResponse approveBookRequest(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) throws UnauthorizedException {
-
-        return libraryService.approveBookRequest(bookRequestId, approvalStatusRequest.getApprovalStatus());
     }
 }

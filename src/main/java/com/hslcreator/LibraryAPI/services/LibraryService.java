@@ -9,11 +9,12 @@ import com.hslcreator.LibraryAPI.models.entities.ApprovalStatus;
 import com.hslcreator.LibraryAPI.models.entities.Book;
 import com.hslcreator.LibraryAPI.models.entities.BookDepartment;
 import com.hslcreator.LibraryAPI.models.entities.BookRequest;
-import com.hslcreator.LibraryAPI.models.entities.BookRequestType;
 import com.hslcreator.LibraryAPI.models.entities.Department;
 import com.hslcreator.LibraryAPI.models.entities.Role;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
+import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
+import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
 import com.hslcreator.LibraryAPI.models.responses.BookResponse;
 import com.hslcreator.LibraryAPI.models.responses.GenericResponse;
 import com.hslcreator.LibraryAPI.repositories.BookDepartmentRepository;
@@ -24,7 +25,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -91,7 +91,7 @@ public class LibraryService {
         return true;
     }
 
-    public GenericResponse requestToBorrowBook(int bookId, BorrowBookRequest request) {
+    public BookRequestResponse requestToBorrowBook(int bookId, BorrowBookRequest request) {
 
         BookRequest bookRequest = BookRequest.builder()
                 .userId(UserUtil.getLoggedInUser().orElseThrow(UserNotFoundException::new).getUserId())
@@ -100,21 +100,15 @@ public class LibraryService {
                 .pickUpDate(request.getPickUpDate().toInstant())
                 .dueDate(request.getDueDate().toInstant())
                 .bookId(bookId)
-                .status(ApprovalStatus.PENDING)
+                .status(ApprovalStatus.NULL)
                 .build();
 
         bookRequestRepository.save(bookRequest);
 
-        return GenericResponse.builder()
-                .message("Request for book has been submitted")
+        return BookRequestResponse.builder()
+                .message("Book has been requested")
+                .bookRequestId(bookRequest.getBookRequestId())
                 .build();
-    }
-
-    public List<BookRequest> getAllBookRequests() throws UnauthorizedException {
-
-        throwErrorIfUserNotAdmin();
-
-        return bookRequestRepository.findAll();
     }
 
     public BookRequest getBookRequestById(int id) throws UnauthorizedException {
@@ -124,25 +118,39 @@ public class LibraryService {
         return bookRequestRepository.findByBookRequestId(id).orElseThrow(BookRequestNotFoundException::new);
     }
 
-    public GenericResponse approveBookRequest(int bookRequestId, ApprovalStatus approvalStatus) throws UnauthorizedException {
-
-        throwErrorIfUserNotAdmin();
-
-        BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
-
-        bookRequest.setStatus(approvalStatus);
-
-        bookRequestRepository.save(bookRequest);
-
-        return GenericResponse.builder()
-                .message("Approval Status has been successfully changed to " + approvalStatus).build();
-    }
-
     public static void throwErrorIfUserNotAdmin() throws UnauthorizedException {
 
         if (!UserUtil.getLoggedInUser().get().getRole().equals(Role.ADMIN)) {
 
             throw new UnauthorizedException("You're not an admin");
         }
+    }
+
+    public GenericResponse changeDueDate(int bookRequestId, ChangeDateRequest changeDateRequest) {
+
+        BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
+        bookRequest.setDueDate(changeDateRequest.getNewDueDate().toInstant());
+        bookRequest.setStatus(ApprovalStatus.NULL);
+        bookRequestRepository.save(bookRequest);
+
+        return GenericResponse.builder()
+                .message("Date has been successfully changed").build();
+    }
+
+    public List<BookRequest> getAllBookRequests() throws UnauthorizedException {
+
+        throwErrorIfUserNotAdmin();
+
+        return bookRequestRepository.findAllByStatus(ApprovalStatus.NULL);
+    }
+
+    public GenericResponse approveDueDate(int bookRequestId, ApprovalStatus approvalStatus) {
+
+        BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
+        bookRequest.setStatus(approvalStatus);
+        bookRequestRepository.save(bookRequest);
+
+        return GenericResponse.builder()
+                .message("Due date has been successfully approved").build();
     }
 }
