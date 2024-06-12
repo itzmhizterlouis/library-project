@@ -25,14 +25,12 @@ public class Book {
     private String author;
     private String name;
     private String about;
-    private String imageUrl;
 
     public BookResponse toDto() {
 
         return BookResponse.builder()
                 .name(name)
                 .author(author)
-                .imageUrl(imageUrl)
                 .about(about)
                 .build();
     }
