@@ -1,5 +1,6 @@
 package com.hslcreator.LibraryAPI.models.responses;
 
+import com.hslcreator.LibraryAPI.models.entities.Role;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,4 +10,5 @@ public class LoginResponse {
 
     private int userId;
     private String token;
+    private Role role;
 }

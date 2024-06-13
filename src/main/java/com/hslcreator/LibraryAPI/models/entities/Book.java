@@ -32,6 +32,7 @@ public class Book {
                 .name(name)
                 .author(author)
                 .about(about)
+                .bookId(bookId)
                 .build();
     }
 }

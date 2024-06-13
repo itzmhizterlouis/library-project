@@ -82,6 +82,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.AccountLockedException;
+
 @RequiredArgsConstructor
 @Service
 public class AuthenticationService {
@@ -108,10 +110,11 @@ public class AuthenticationService {
          return LoginResponse.builder()
                  .userId(user.getUserId())
                  .token(jwtToken)
+                 .role(user.getRole())
                  .build();
     }
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) throws AccountLockedException {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getMatricNumber(), request.getPassword()));
@@ -119,11 +122,17 @@ public class AuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         User user = UserUtil.getLoggedInUser().orElseThrow();
 
+        if (user.isLocked()) {
+
+            throw new AccountLockedException("Account Has been locked");
+        }
+
         var jwtToken = jwtService.generateToken(user);
 
         return LoginResponse.builder()
                 .userId(user.getUserId())
                 .token(jwtToken)
+                .role(user.getRole())
                 .build();
     }
 }

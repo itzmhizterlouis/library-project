@@ -61,6 +61,7 @@ public class User implements UserDetails {
                 .userId(userId)
                 .matricNumber(matricNumber)
                 .department(department)
+                .role(role)
                 .build();
     }
 

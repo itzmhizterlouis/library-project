@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.security.auth.login.AccountLockedException;
 import java.time.Instant;
 import java.time.temporal.ChronoField;
 
@@ -46,5 +47,12 @@ public class ExceptionControllerAdvice {
     public AppResponse handleGenericException(Exception ex) {
         log.error("An error occurred: ", ex);
         return AppResponseUtil.buildErrorResponse("An error occurred while handling your request");
+    }
+
+    @ExceptionHandler(AccountLockedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public AppResponse handleAccountLockedException(AccountLockedException ex){
+        log.error(ex.getMessage(), ex);
+        return AppResponseUtil.buildErrorResponse("Account has been locked");
     }
 }
