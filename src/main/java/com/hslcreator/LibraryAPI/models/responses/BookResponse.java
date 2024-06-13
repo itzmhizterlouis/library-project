@@ -8,8 +8,8 @@ import lombok.Data;
 @Builder
 public class BookResponse {
 
-    private String imageUrl;
     private String author;
     private String about;
     private String name;
+    private int bookId;
 }
