@@ -38,7 +38,7 @@ public class ExceptionControllerAdvice {
     public AppResponse handleDataIntegrityViolationException(DataIntegrityViolationException ex){
         Long timestamp = Instant.now().getLong(ChronoField.INSTANT_SECONDS);
         log.error(timestamp + " " + ex.getMessage(), ex);
-        return AppResponseUtil.buildErrorResponse("Kindly Contact the administrator Refrence: " + timestamp);
+        return AppResponseUtil.buildErrorResponse("Kindly Contact the administrator Reference: " + timestamp);
     }
 
     @ExceptionHandler({Exception.class})
