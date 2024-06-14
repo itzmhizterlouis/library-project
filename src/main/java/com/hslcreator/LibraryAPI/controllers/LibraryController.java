@@ -12,6 +12,7 @@ import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
 import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
 import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
 import com.hslcreator.LibraryAPI.models.responses.BookResponse;
+import com.hslcreator.LibraryAPI.models.responses.ChangeDueDateResponse;
 import com.hslcreator.LibraryAPI.models.responses.GenericResponse;
 import com.hslcreator.LibraryAPI.services.LibraryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,9 +78,9 @@ public class LibraryController {
         return libraryService.changeDueDate(bookRequestId, changeDateRequest);
     }
 
-    @Operation(summary = "Get All Book Requests User", description = "(Admin)Returns a list of all requests for book whether reserve or borrow(Admin)")
+    @Operation(summary = "Get All Book Requests for all users", description = "(Admin)Returns a list of all requests for book whether reserve or borrow(Admin)")
     @GetMapping("books/requests")
-    public List<BookRequest> getAllChangeDueDateRequests() throws UnauthorizedException {
+    public List<ChangeDueDateResponse> getAllChangeDueDateRequests() throws UnauthorizedException {
 
         return libraryService.getAllBookRequests();
     }
