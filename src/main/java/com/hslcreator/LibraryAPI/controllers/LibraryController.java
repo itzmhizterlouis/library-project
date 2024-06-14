@@ -7,6 +7,7 @@ import com.hslcreator.LibraryAPI.models.entities.BookRequest;
 import com.hslcreator.LibraryAPI.models.entities.Department;
 import com.hslcreator.LibraryAPI.models.requests.ApprovalStatusRequest;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
+import com.hslcreator.LibraryAPI.models.requests.BookSearchRequest;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
 import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
 import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
@@ -102,5 +103,12 @@ public class LibraryController {
     public GenericResponse deleteBookRequest(@PathVariable int bookRequestId) {
 
         return libraryService.deleteBookRequest(bookRequestId);
+    }
+
+    @Operation(summary = "Searching for books in library", description = "it uses like in the where clause to search for books. Also disregard the fact that its a post endpoint, it is for getting all books with the parameters provided. Just take a look at the response type.")
+    @PostMapping("books/search")
+    public List<BookResponse> searchForBooksWithThisPattern(@RequestBody BookSearchRequest request) {
+
+        return libraryService.searchForBookWithThisPattern(request);
     }
 }
