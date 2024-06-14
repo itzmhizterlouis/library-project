@@ -12,6 +12,7 @@ import com.hslcreator.LibraryAPI.models.entities.BookRequest;
 import com.hslcreator.LibraryAPI.models.entities.Department;
 import com.hslcreator.LibraryAPI.models.entities.Role;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
+import com.hslcreator.LibraryAPI.models.requests.BookSearchRequest;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
 import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
 import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
@@ -23,6 +24,7 @@ import com.hslcreator.LibraryAPI.repositories.BookRequestRepository;
 import com.hslcreator.LibraryAPI.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -162,5 +164,24 @@ public class LibraryService {
 
         return GenericResponse.builder()
                 .message("Book Request has been successfully deleted").build();
+    }
+
+    public List<BookResponse> searchForBookWithThisPattern(BookSearchRequest request) {
+
+        if (request.getBookName() == null || request.getAuthor() == null) {
+
+            request.setAuthor("");
+            request.setBookName("");
+        }
+
+        Specification<Book> bookNameSpecification = (root, query, cb) -> cb.like(
+                root.get("name"), ("%" + request.getBookName().toUpperCase() + "%")
+        );
+
+        Specification<Book> authorNameSpecification = (root, query, cb) -> cb.like(
+                root.get("author"), ("%" + request.getAuthor().toUpperCase() + "%")
+        );
+
+        return bookRepository.findAll(bookNameSpecification.or(authorNameSpecification)).parallelStream().map(Book::toDto).toList();
     }
 }
