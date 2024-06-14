@@ -17,6 +17,7 @@ import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
 import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
 import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
 import com.hslcreator.LibraryAPI.models.responses.BookResponse;
+import com.hslcreator.LibraryAPI.models.responses.ChangeDueDateResponse;
 import com.hslcreator.LibraryAPI.models.responses.GenericResponse;
 import com.hslcreator.LibraryAPI.repositories.BookDepartmentRepository;
 import com.hslcreator.LibraryAPI.repositories.BookRepository;
@@ -39,6 +40,7 @@ public class LibraryService {
     private final BookRepository bookRepository;
     private final BookDepartmentRepository bookDepartmentRepository;
     private final BookRequestRepository bookRequestRepository;
+    private final UserService userService;
 
     public BookResponse uploadBook(BookDto bookDto) throws UnauthorizedException {
 
@@ -138,11 +140,20 @@ public class LibraryService {
                 .message("Date has been successfully changed").build();
     }
 
-    public List<BookRequest> getAllBookRequests() throws UnauthorizedException {
+    public List<ChangeDueDateResponse> getAllBookRequests() throws UnauthorizedException {
 
         throwErrorIfUserNotAdmin();
 
-        return bookRequestRepository.findAllByStatus(ApprovalStatus.NULL);
+        return bookRequestRepository.findAllByStatus(ApprovalStatus.NULL)
+                .parallelStream().map(bookRequest -> {
+                    var user = userService.findUserById(bookRequest.getUserId());
+
+                    return ChangeDueDateResponse.builder()
+                            .matricNumber(user.getMatricNumber())
+                            .bookRequestId(bookRequest.getBookRequestId())
+                            .dueDate(bookRequestRepository.findByBookRequestId(bookRequest.getBookRequestId()).get().getDueDate())
+                            .build();
+                }).toList();
     }
 
     public GenericResponse approveDueDate(int bookRequestId, ApprovalStatus approvalStatus) throws UnauthorizedException {
