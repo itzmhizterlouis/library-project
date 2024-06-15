@@ -2,5 +2,5 @@ package com.hslcreator.LibraryAPI.models.entities;
 
 public enum Department {
 
-    EIE, CIVIL, CHEM, PET, MECH
+    EIE, CIVIL, PET_CHEM, MECH
 }
