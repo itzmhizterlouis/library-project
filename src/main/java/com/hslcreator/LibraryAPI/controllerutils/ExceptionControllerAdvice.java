@@ -47,7 +47,7 @@ public class ExceptionControllerAdvice {
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     public AppResponse handleGenericException(Exception ex) {
         log.error("An error occurred: ", ex);
-        return AppResponseUtil.buildErrorResponse("An error occurred while handling your request");
+        return AppResponseUtil.buildErrorResponse("An error occurred while handling your request " + ex.getMessage());
     }
 
     @ExceptionHandler(AccountLockedException.class)

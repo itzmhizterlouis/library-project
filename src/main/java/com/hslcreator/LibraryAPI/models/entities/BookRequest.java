@@ -14,7 +14,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -39,4 +38,6 @@ public class BookRequest {
 
     @Enumerated(EnumType.STRING)
     private ApprovalStatus status;
+
+    private Instant createdAt;
 }

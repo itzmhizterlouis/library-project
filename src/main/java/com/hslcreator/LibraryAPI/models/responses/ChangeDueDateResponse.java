@@ -11,5 +11,6 @@ public class ChangeDueDateResponse {
 
     private String matricNumber;
     private int bookRequestId;
-    private Instant dueDate;
+    private Instant oldDueDate;
+    private Instant newDueDate;
 }

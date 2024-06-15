@@ -3,18 +3,20 @@ package com.hslcreator.LibraryAPI.services;
 
 import com.hslcreator.LibraryAPI.exceptions.BookNotFoundException;
 import com.hslcreator.LibraryAPI.exceptions.BookRequestNotFoundException;
+import com.hslcreator.LibraryAPI.exceptions.ChangeDateRequestNotFoundException;
 import com.hslcreator.LibraryAPI.exceptions.UnauthorizedException;
 import com.hslcreator.LibraryAPI.exceptions.UserNotFoundException;
 import com.hslcreator.LibraryAPI.models.entities.ApprovalStatus;
 import com.hslcreator.LibraryAPI.models.entities.Book;
 import com.hslcreator.LibraryAPI.models.entities.BookDepartment;
 import com.hslcreator.LibraryAPI.models.entities.BookRequest;
+import com.hslcreator.LibraryAPI.models.entities.ChangeDateRequest;
 import com.hslcreator.LibraryAPI.models.entities.Department;
 import com.hslcreator.LibraryAPI.models.entities.Role;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
 import com.hslcreator.LibraryAPI.models.requests.BookSearchRequest;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
-import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
+import com.hslcreator.LibraryAPI.models.requests.ChangeDateDto;
 import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
 import com.hslcreator.LibraryAPI.models.responses.BookResponse;
 import com.hslcreator.LibraryAPI.models.responses.ChangeDueDateResponse;
@@ -22,12 +24,15 @@ import com.hslcreator.LibraryAPI.models.responses.GenericResponse;
 import com.hslcreator.LibraryAPI.repositories.BookDepartmentRepository;
 import com.hslcreator.LibraryAPI.repositories.BookRepository;
 import com.hslcreator.LibraryAPI.repositories.BookRequestRepository;
+import com.hslcreator.LibraryAPI.repositories.ChangeDateRequestRepository;
 import com.hslcreator.LibraryAPI.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +46,7 @@ public class LibraryService {
     private final BookDepartmentRepository bookDepartmentRepository;
     private final BookRequestRepository bookRequestRepository;
     private final UserService userService;
+    private final ChangeDateRequestRepository changeDateRequestRepository;
 
     public BookResponse uploadBook(BookDto bookDto) throws UnauthorizedException {
 
@@ -103,7 +109,8 @@ public class LibraryService {
                 .pickUpDate(request.getPickUpDate().toInstant())
                 .dueDate(request.getDueDate().toInstant())
                 .bookId(bookId)
-                .status(ApprovalStatus.NULL)
+                .status(ApprovalStatus.PENDING)
+                .createdAt(Instant.now())
                 .build();
 
         bookRequestRepository.save(bookRequest);
@@ -111,6 +118,7 @@ public class LibraryService {
         return BookRequestResponse.builder()
                 .message("Book has been requested")
                 .bookRequestId(bookRequest.getBookRequestId())
+                .approvalStatus(bookRequest.getStatus())
                 .build();
     }
 
@@ -129,43 +137,76 @@ public class LibraryService {
         }
     }
 
-    public GenericResponse changeDueDate(int bookRequestId, ChangeDateRequest changeDateRequest) {
+    public GenericResponse changeDueDate(int bookRequestId, ChangeDateDto changeDateDto) {
 
         BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
-        bookRequest.setDueDate(changeDateRequest.getNewDueDate().toInstant());
-        bookRequest.setStatus(ApprovalStatus.NULL);
-        bookRequestRepository.save(bookRequest);
+
+        ChangeDateRequest changeDateRequest;
+
+        if (changeDateRequestRepository.existsByBookRequestId(bookRequestId)) {
+
+            changeDateRequest = changeDateRequestRepository.findByBookRequestId(bookRequestId).get();
+            changeDateRequest.setNewDueDate(changeDateDto.getNewDueDate().toInstant());
+        }
+
+        else {
+
+            changeDateRequest = ChangeDateRequest.builder()
+                    .oldDueDate(bookRequest.getDueDate())
+                    .newDueDate(changeDateDto.getNewDueDate().toInstant())
+                    .bookRequestId(bookRequestId)
+                    .userId(UserUtil.getLoggedInUser().get().getUserId())
+                    .build();
+        }
+
+        changeDateRequestRepository.save(changeDateRequest);
 
         return GenericResponse.builder()
-                .message("Date has been successfully changed").build();
+                .message("Request to change date has been sent").build();
     }
 
-    public List<ChangeDueDateResponse> getAllBookRequests() throws UnauthorizedException {
+    public List<ChangeDueDateResponse> getAllChangeDueDateRequests() throws UnauthorizedException {
 
         throwErrorIfUserNotAdmin();
 
-        return bookRequestRepository.findAllByStatus(ApprovalStatus.NULL)
-                .parallelStream().map(bookRequest -> {
-                    var user = userService.findUserById(bookRequest.getUserId());
-
-                    return ChangeDueDateResponse.builder()
-                            .matricNumber(user.getMatricNumber())
-                            .bookRequestId(bookRequest.getBookRequestId())
-                            .dueDate(bookRequestRepository.findByBookRequestId(bookRequest.getBookRequestId()).get().getDueDate())
-                            .build();
-                }).toList();
+        return changeDateRequestRepository.findAll()
+                .parallelStream().map(
+                        changeDateRequest -> ChangeDueDateResponse.builder()
+                                .oldDueDate(changeDateRequest.getOldDueDate())
+                                .newDueDate(changeDateRequest.getNewDueDate())
+                                .matricNumber(userService.findUserById(changeDateRequest.getUserId()).getMatricNumber())
+                                .bookRequestId(changeDateRequest.getBookRequestId())
+                                .build()
+                ).toList();
     }
 
     public GenericResponse approveDueDate(int bookRequestId, ApprovalStatus approvalStatus) throws UnauthorizedException {
 
         throwErrorIfUserNotAdmin();
 
-        BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
-        bookRequest.setStatus(approvalStatus);
-        bookRequestRepository.save(bookRequest);
+        ChangeDateRequest changeDateRequest = changeDateRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(ChangeDateRequestNotFoundException::new);
 
-        return GenericResponse.builder()
-                .message("Due date has been successfully approved").build();
+        if (approvalStatus.equals(ApprovalStatus.APPROVED)) {
+
+            BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
+
+            bookRequest.setDueDate(changeDateRequest.getNewDueDate());
+            bookRequestRepository.save(bookRequest);
+
+            changeDateRequestRepository.delete(changeDateRequest);
+
+            return GenericResponse.builder()
+                    .message("Request to change due date has been approved").build();
+
+        }
+
+        else {
+
+            changeDateRequestRepository.delete(changeDateRequest);
+
+            return GenericResponse.builder()
+                    .message("Request to change due date has been declined").build();
+        }
     }
 
     @Transactional
@@ -194,5 +235,23 @@ public class LibraryService {
         );
 
         return bookRepository.findAll(bookNameSpecification.or(authorNameSpecification)).parallelStream().map(Book::toDto).toList();
+    }
+
+    public List<BookRequest> getAllBookRequests() {
+
+        return bookRequestRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
+    }
+
+    public GenericResponse approveRequestToBorrowBook(int bookRequestId, ApprovalStatus approvalStatus) {
+
+        BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
+
+        bookRequest.setStatus(approvalStatus);
+
+        bookRequestRepository.save(bookRequest);
+
+        return GenericResponse.builder()
+                .message("Request to borrow book has been approved")
+                .build();
     }
 }
