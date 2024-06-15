@@ -71,12 +71,14 @@ public class LibraryController {
         return libraryService.requestToBorrowBook(bookId, request);
     }
 
+    @Operation(summary = "Approve/Reject Borrow Book Request")
     @PutMapping("books/requests/{bookRequestId}/approve")
     public GenericResponse approveRequestToBorrowBook(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) {
 
         return libraryService.approveRequestToBorrowBook(bookRequestId, approvalStatusRequest.getApprovalStatus());
     }
 
+    @Operation(summary = "Get All Book Requests", description = "Returns the date of request of books from latest to oldest")
     @GetMapping("books/requests/all")
     public List<BookRequest> getAllBookRequests() {
 
@@ -91,7 +93,7 @@ public class LibraryController {
     }
 
     @Operation(summary = "Get All Change Due Date Requests for all users", description = "(Admin)Returns a list of all requests for book whether reserve or borrow(Admin)")
-    @GetMapping("books/requests")
+    @GetMapping("books/requests/change-due-date")
     public List<ChangeDueDateResponse> getAllChangeDueDateRequests() throws UnauthorizedException {
 
         return libraryService.getAllChangeDueDateRequests();
