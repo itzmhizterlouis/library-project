@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -54,5 +55,12 @@ public class ExceptionControllerAdvice {
     public AppResponse handleAccountLockedException(AccountLockedException ex){
         log.error(ex.getMessage(), ex);
         return AppResponseUtil.buildErrorResponse("Account has been locked");
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public AppResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException ex){
+        log.error(ex.getMessage(), ex);
+        return AppResponseUtil.buildErrorResponse("Unable to parse JSON request\n" + ex.getMessage());
     }
 }
