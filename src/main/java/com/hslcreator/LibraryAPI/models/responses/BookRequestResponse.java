@@ -1,5 +1,6 @@
 package com.hslcreator.LibraryAPI.models.responses;
 
+import com.hslcreator.LibraryAPI.models.entities.ApprovalStatus;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,4 +10,5 @@ public class BookRequestResponse {
 
     private String message;
     private int bookRequestId;
+    private ApprovalStatus approvalStatus;
 }

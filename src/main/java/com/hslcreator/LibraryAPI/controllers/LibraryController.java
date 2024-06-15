@@ -9,7 +9,7 @@ import com.hslcreator.LibraryAPI.models.requests.ApprovalStatusRequest;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
 import com.hslcreator.LibraryAPI.models.requests.BookSearchRequest;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
-import com.hslcreator.LibraryAPI.models.requests.ChangeDateRequest;
+import com.hslcreator.LibraryAPI.models.requests.ChangeDateDto;
 import com.hslcreator.LibraryAPI.models.responses.BookRequestResponse;
 import com.hslcreator.LibraryAPI.models.responses.BookResponse;
 import com.hslcreator.LibraryAPI.models.responses.ChangeDueDateResponse;
@@ -71,18 +71,30 @@ public class LibraryController {
         return libraryService.requestToBorrowBook(bookId, request);
     }
 
-    @Operation(summary = "Change Due Date Request", description = "Endpoint for requesting to change due date (admin has to approve after)")
-    @PutMapping("books/requests/change-due-date/{bookRequestId}")
-    public GenericResponse changeDueDate(@PathVariable int bookRequestId, @RequestBody ChangeDateRequest changeDateRequest) {
+    @PutMapping("books/requests/{bookRequestId}/approve")
+    public GenericResponse approveRequestToBorrowBook(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) {
 
-        return libraryService.changeDueDate(bookRequestId, changeDateRequest);
+        return libraryService.approveRequestToBorrowBook(bookRequestId, approvalStatusRequest.getApprovalStatus());
     }
 
-    @Operation(summary = "Get All Book Requests for all users", description = "(Admin)Returns a list of all requests for book whether reserve or borrow(Admin)")
+    @GetMapping("books/requests/all")
+    public List<BookRequest> getAllBookRequests() {
+
+        return libraryService.getAllBookRequests();
+    }
+
+    @Operation(summary = "Change Due Date Request", description = "Endpoint for requesting to change due date (admin has to approve after)")
+    @PutMapping("books/requests/change-due-date/{bookRequestId}")
+    public GenericResponse changeDueDate(@PathVariable int bookRequestId, @RequestBody ChangeDateDto changeDateDto) {
+
+        return libraryService.changeDueDate(bookRequestId, changeDateDto);
+    }
+
+    @Operation(summary = "Get All Change Due Date Requests for all users", description = "(Admin)Returns a list of all requests for book whether reserve or borrow(Admin)")
     @GetMapping("books/requests")
     public List<ChangeDueDateResponse> getAllChangeDueDateRequests() throws UnauthorizedException {
 
-        return libraryService.getAllBookRequests();
+        return libraryService.getAllChangeDueDateRequests();
     }
 
     @Operation(summary = "Approve Due Date User", description = "(Admin) can only approve due date")
