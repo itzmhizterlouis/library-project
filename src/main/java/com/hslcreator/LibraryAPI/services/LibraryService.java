@@ -270,4 +270,11 @@ public class LibraryService {
                 .message("Request to borrow book has been approved")
                 .build();
     }
+
+    public List<BookRequest> getAllUserBookRequests() {
+
+        User user = UserUtil.getLoggedInUser().get();
+
+        return bookRequestRepository.findByUserId(user.getUserId());
+    }
 }

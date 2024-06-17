@@ -126,4 +126,11 @@ public class LibraryController {
 
         return libraryService.searchForBookWithThisPattern(request);
     }
+
+    @Operation(summary = "Get All Book Requests By User", description = "You can get the due date for the book request of a user")
+    @GetMapping("books/requests/me")
+    public List<BookRequest> getAllBookRequestsForUser() {
+
+        return libraryService.getAllUserBookRequests();
+    }
 }

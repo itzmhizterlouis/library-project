@@ -13,4 +13,6 @@ public interface BookRequestRepository extends JpaRepository<BookRequest, Long> 
     List<BookRequest> findAllByStatus(ApprovalStatus approvalStatus);
 
     void deleteByBookRequestId(int bookRequestId);
+
+    List<BookRequest> findByUserId(int userId);
 }
