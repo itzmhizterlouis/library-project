@@ -13,6 +13,7 @@ import com.hslcreator.LibraryAPI.models.entities.BookRequest;
 import com.hslcreator.LibraryAPI.models.entities.ChangeDateRequest;
 import com.hslcreator.LibraryAPI.models.entities.Department;
 import com.hslcreator.LibraryAPI.models.entities.Role;
+import com.hslcreator.LibraryAPI.models.entities.User;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
 import com.hslcreator.LibraryAPI.models.requests.BookSearchRequest;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -220,21 +222,35 @@ public class LibraryService {
 
     public List<BookResponse> searchForBookWithThisPattern(BookSearchRequest request) {
 
-        if (request.getBookName() == null || request.getAuthor() == null) {
+        if (request.getSearchString() == null) {
 
-            request.setAuthor("");
-            request.setBookName("");
+            request.setSearchString("");
         }
 
+        User user = UserUtil.getLoggedInUser().get();
+
         Specification<Book> bookNameSpecification = (root, query, cb) -> cb.like(
-                root.get("name"), ("%" + request.getBookName().toUpperCase() + "%")
+                root.get("name"), ("%" + request.getSearchString().toUpperCase() + "%")
         );
 
         Specification<Book> authorNameSpecification = (root, query, cb) -> cb.like(
-                root.get("author"), ("%" + request.getAuthor().toUpperCase() + "%")
+                root.get("author"), ("%" + request.getSearchString().toUpperCase() + "%")
         );
 
-        return bookRepository.findAll(bookNameSpecification.or(authorNameSpecification)).parallelStream().map(Book::toDto).toList();
+        List<BookResponse> response = new java.util.ArrayList<>(bookRepository.findAll(bookNameSpecification.or(authorNameSpecification)).parallelStream().map(book -> {
+
+            BookDepartment bookDepartment = bookDepartmentRepository.findByBookId(book.getBookId()).get();
+            if (!user.getDepartment().equals(bookDepartment.getDepartmentName())) {
+
+                return null;
+            }
+
+            return book.toDto();
+        }).toList());
+
+        response.removeIf(Objects::isNull);
+
+        return response;
     }
 
     public List<BookRequest> getAllBookRequests() {

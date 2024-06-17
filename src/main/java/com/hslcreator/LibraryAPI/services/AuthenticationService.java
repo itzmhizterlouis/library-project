@@ -111,6 +111,7 @@ public class AuthenticationService {
                  .userId(user.getUserId())
                  .token(jwtToken)
                  .role(user.getRole())
+                 .department(user.getDepartment())
                  .build();
     }
 
@@ -133,6 +134,7 @@ public class AuthenticationService {
                 .userId(user.getUserId())
                 .token(jwtToken)
                 .role(user.getRole())
+                .department(user.getDepartment())
                 .build();
     }
 }
