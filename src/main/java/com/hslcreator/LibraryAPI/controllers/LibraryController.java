@@ -120,7 +120,7 @@ public class LibraryController {
         return libraryService.deleteBookRequest(bookRequestId);
     }
 
-    @Operation(summary = "Searching for books in library", description = "it uses like in the where clause to search for books. Also disregard the fact that its a post endpoint, it is for getting all books with the parameters provided. Just take a look at the response type.")
+    @Operation(summary = "Searching for books in library", description = "For the search string you can either pass in author name or book name. It uses like in the where clause to search for books. Also disregard the fact that its a post endpoint, it is for getting all books with the parameters provided. Just take a look at the response type.")
     @PostMapping("books/search")
     public List<BookResponse> searchForBooksWithThisPattern(@RequestBody BookSearchRequest request) {
 

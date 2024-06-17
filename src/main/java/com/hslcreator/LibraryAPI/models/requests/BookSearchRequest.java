@@ -6,6 +6,5 @@ import lombok.Data;
 @Data
 public class BookSearchRequest {
 
-    private String bookName;
-    private String author;
+    private String searchString;
 }
