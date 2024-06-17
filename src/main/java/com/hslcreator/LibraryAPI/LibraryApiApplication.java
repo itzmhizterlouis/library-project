@@ -21,8 +21,8 @@ public class LibraryApiApplication {
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("https://localhost:5173", "http://localhost:5173", "http://localhost:5174", "https://localhost:5174"));
-		configuration.setAllowedMethods(Arrays.asList("GET","POST"));
+		configuration.setAllowedOrigins(Arrays.asList("https://localhost:5173", "http://localhost:5173", "http://localhost:5174", "https://localhost:5174", "*"));
+		configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
