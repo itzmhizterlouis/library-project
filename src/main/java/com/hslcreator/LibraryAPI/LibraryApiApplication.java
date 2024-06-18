@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
 
@@ -19,13 +20,15 @@ public class LibraryApiApplication {
 	}
 
 	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(Arrays.asList("https://localhost:5173", "http://localhost:5173", "http://localhost:5174", "https://localhost:5174", "*"));
-		configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE", "OPTIONS"));
+	public CorsFilter corsFilter() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowCredentials(true);
+		config.addAllowedOrigin("*"); // Allow all origins, adjust this for specific origins
+		config.addAllowedHeader("*"); // Allow all headers
+		config.addAllowedMethod("*"); // Allow all HTTP methods
+		source.registerCorsConfiguration("/**", config);
+		return new CorsFilter(source);
 	}
 
 }
