@@ -19,16 +19,4 @@ public class LibraryApiApplication {
 		SpringApplication.run(LibraryApiApplication.class, args);
 	}
 
-	@Bean
-	public CorsFilter corsFilter() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
-		config.addAllowedOrigin("*"); // Allow all origins, adjust this for specific origins
-		config.addAllowedHeader("*"); // Allow all headers
-		config.addAllowedMethod("*"); // Allow all HTTP methods
-		source.registerCorsConfiguration("/**", config);
-		return new CorsFilter(source);
-	}
-
 }
