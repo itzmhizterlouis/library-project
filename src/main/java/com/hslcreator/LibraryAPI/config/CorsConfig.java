@@ -17,7 +17,7 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5173", "http://localhost:5174", "https://localhost:5174", "http://localhost:3000", "https://localhost:3000", "http://localhost:443", "https://localhost:440", "http://localhost:80", "https://localhost:80")); // Allow all origins (adjust as needed)
+        config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:5173", "http://localhost:5174", "https://localhost:5174", "http://localhost:3000", "https://localhost:3000", "http://localhost:443", "https://localhost:440", "http://localhost:80", "https://localhost:80", "https://samdanfinalyear.netlify.app", "http://samdanfinalyear.netlify.app")); // Allow all origins (adjust as needed)
         config.addAllowedHeader("*"); // Allow all headers
         config.addAllowedMethod("GET");
         config.addAllowedMethod("POST");
