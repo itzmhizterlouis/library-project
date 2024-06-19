@@ -277,4 +277,15 @@ public class LibraryService {
 
         return bookRequestRepository.findByUserId(user.getUserId());
     }
+
+    @Transactional
+    public GenericResponse returnBook(int bookRequestId) {
+
+        var bookRequest = bookRequestRepository.findByBookRequestIdAndUserId(bookRequestId, UserUtil.getLoggedInUser().get().getUserId()).orElseThrow(BookRequestNotFoundException::new);
+        bookRequestRepository.delete(bookRequest);
+
+        return GenericResponse.builder()
+                .message("Book has been successfully deleted")
+                .build();
+    }
 }
