@@ -14,4 +14,5 @@ public class UserResponse {
     private int userId;
     private Department department;
     private Role role;
+    private boolean locked;
 }
