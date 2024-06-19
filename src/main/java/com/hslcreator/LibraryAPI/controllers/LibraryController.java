@@ -58,7 +58,7 @@ public class LibraryController {
     }
 
     @Operation(summary = "Delete Book", description = "(Admin)Delete Book by book id")
-    @DeleteMapping("books/{id}")
+    @PostMapping("books/delete/{id}")
     public boolean deleteBook(@PathVariable int id) throws UnauthorizedException {
 
         return libraryService.deleteBook(id);
@@ -72,7 +72,7 @@ public class LibraryController {
     }
 
     @Operation(summary = "Approve/Reject Borrow Book Request")
-    @PutMapping("books/requests/{bookRequestId}/approve")
+    @PostMapping("books/requests/{bookRequestId}/approve")
     public GenericResponse approveRequestToBorrowBook(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) {
 
         return libraryService.approveRequestToBorrowBook(bookRequestId, approvalStatusRequest.getApprovalStatus());
@@ -86,7 +86,7 @@ public class LibraryController {
     }
 
     @Operation(summary = "Change Due Date Request", description = "Endpoint for requesting to change due date (admin has to approve after)")
-    @PutMapping("books/requests/change-due-date/{bookRequestId}")
+    @PostMapping("books/requests/change-due-date/{bookRequestId}")
     public GenericResponse changeDueDate(@PathVariable int bookRequestId, @RequestBody ChangeDateDto changeDateDto) {
 
         return libraryService.changeDueDate(bookRequestId, changeDateDto);
@@ -100,7 +100,7 @@ public class LibraryController {
     }
 
     @Operation(summary = "Approve Due Date User", description = "(Admin) can only approve due date")
-    @PutMapping("books/requests/{bookRequestId}/approve-due-date")
+    @PostMapping("books/requests/{bookRequestId}/approve-due-date")
     public GenericResponse approveDueDate(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) throws UnauthorizedException {
 
         return libraryService.approveDueDate(bookRequestId, approvalStatusRequest.getApprovalStatus());
@@ -114,7 +114,7 @@ public class LibraryController {
     }
 
     @Operation(summary = "Delete Book Request", description = "Mostly used by users to delete book request")
-    @DeleteMapping("books/requests/{bookRequestId}")
+    @PostMapping("books/requests/delete/{bookRequestId}")
     public GenericResponse deleteBookRequest(@PathVariable int bookRequestId) {
 
         return libraryService.deleteBookRequest(bookRequestId);
