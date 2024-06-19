@@ -12,8 +12,10 @@ import com.hslcreator.LibraryAPI.models.entities.BookDepartment;
 import com.hslcreator.LibraryAPI.models.entities.BookRequest;
 import com.hslcreator.LibraryAPI.models.entities.ChangeDateRequest;
 import com.hslcreator.LibraryAPI.models.entities.Department;
+import com.hslcreator.LibraryAPI.models.entities.Message;
 import com.hslcreator.LibraryAPI.models.entities.Role;
 import com.hslcreator.LibraryAPI.models.entities.User;
+import com.hslcreator.LibraryAPI.models.requests.ApproveBookRequestDto;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
 import com.hslcreator.LibraryAPI.models.requests.BookSearchRequest;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
@@ -26,6 +28,7 @@ import com.hslcreator.LibraryAPI.repositories.BookDepartmentRepository;
 import com.hslcreator.LibraryAPI.repositories.BookRepository;
 import com.hslcreator.LibraryAPI.repositories.BookRequestRepository;
 import com.hslcreator.LibraryAPI.repositories.ChangeDateRequestRepository;
+import com.hslcreator.LibraryAPI.repositories.MessageRepository;
 import com.hslcreator.LibraryAPI.utils.UserUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +52,7 @@ public class LibraryService {
     private final BookRequestRepository bookRequestRepository;
     private final UserService userService;
     private final ChangeDateRequestRepository changeDateRequestRepository;
+    private final MessageRepository messageRepository;
 
     public BookResponse uploadBook(BookDto bookDto) throws UnauthorizedException {
 
@@ -258,16 +262,30 @@ public class LibraryService {
         return bookRequestRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
-    public GenericResponse approveRequestToBorrowBook(int bookRequestId, ApprovalStatus approvalStatus) {
+    public GenericResponse approveRequestToBorrowBook(int bookRequestId, ApproveBookRequestDto request) {
 
         BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
 
-        bookRequest.setStatus(approvalStatus);
+        if (request.getApprovalStatus().equals(ApprovalStatus.REJECTED)) {
 
-        bookRequestRepository.save(bookRequest);
+            bookRequestRepository.delete(bookRequest);
+        }
+
+        else {
+            bookRequest.setStatus(request.getApprovalStatus());
+
+            Message message = Message.builder()
+                    .message(request.getMessage() + "\nHence Request was " + request.getApprovalStatus())
+                    .adminId(UserUtil.getLoggedInUser().get().getUserId())
+                    .userId(bookRequest.getUserId())
+                    .build();
+
+            messageRepository.save(message);
+            bookRequestRepository.save(bookRequest);
+        }
 
         return GenericResponse.builder()
-                .message("Request to borrow book has been approved")
+                .message("Request has been processed and message has been sent")
                 .build();
     }
 

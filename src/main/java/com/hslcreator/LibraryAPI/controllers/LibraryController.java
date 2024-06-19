@@ -6,6 +6,7 @@ import com.hslcreator.LibraryAPI.exceptions.UnauthorizedException;
 import com.hslcreator.LibraryAPI.models.entities.BookRequest;
 import com.hslcreator.LibraryAPI.models.entities.Department;
 import com.hslcreator.LibraryAPI.models.requests.ApprovalStatusRequest;
+import com.hslcreator.LibraryAPI.models.requests.ApproveBookRequestDto;
 import com.hslcreator.LibraryAPI.models.requests.BookDto;
 import com.hslcreator.LibraryAPI.models.requests.BookSearchRequest;
 import com.hslcreator.LibraryAPI.models.requests.BorrowBookRequest;
@@ -71,9 +72,9 @@ public class LibraryController {
 
     @Operation(summary = "Approve/Reject Borrow Book Request")
     @PostMapping("books/requests/{bookRequestId}/approve")
-    public GenericResponse approveRequestToBorrowBook(@PathVariable int bookRequestId, @RequestBody ApprovalStatusRequest approvalStatusRequest) {
+    public GenericResponse approveRequestToBorrowBook(@PathVariable int bookRequestId, @RequestBody ApproveBookRequestDto request) {
 
-        return libraryService.approveRequestToBorrowBook(bookRequestId, approvalStatusRequest.getApprovalStatus());
+        return libraryService.approveRequestToBorrowBook(bookRequestId, request);
     }
 
     @Operation(summary = "Get All Book Requests", description = "Returns the date of request of books from latest to oldest")
@@ -138,5 +139,4 @@ public class LibraryController {
 
         return libraryService.returnBook(bookRequestId);
     }
-
 }
