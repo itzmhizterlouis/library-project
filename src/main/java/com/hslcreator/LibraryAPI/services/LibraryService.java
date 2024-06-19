@@ -278,6 +278,8 @@ public class LibraryService {
                     .message(request.getMessage() + "\nHence Request was " + request.getApprovalStatus())
                     .adminId(UserUtil.getLoggedInUser().get().getUserId())
                     .userId(bookRequest.getUserId())
+                    .bookId(bookRequest.getBookId())
+                    .createdAt(Instant.now())
                     .build();
 
             messageRepository.save(message);

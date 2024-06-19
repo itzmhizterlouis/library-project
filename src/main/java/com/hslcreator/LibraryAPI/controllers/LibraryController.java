@@ -70,7 +70,7 @@ public class LibraryController {
         return libraryService.requestToBorrowBook(bookId, request);
     }
 
-    @Operation(summary = "Approve/Reject Borrow Book Request")
+    @Operation(summary = "Approve/Reject Borrow Book Request", description = "When done sends a notification to the user")
     @PostMapping("books/requests/{bookRequestId}/approve")
     public GenericResponse approveRequestToBorrowBook(@PathVariable int bookRequestId, @RequestBody ApproveBookRequestDto request) {
 
