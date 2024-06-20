@@ -274,17 +274,18 @@ public class LibraryService {
         else {
             bookRequest.setStatus(request.getApprovalStatus());
 
-            Message message = Message.builder()
-                    .message(request.getMessage() + "\nHence Request was " + request.getApprovalStatus())
-                    .adminId(UserUtil.getLoggedInUser().get().getUserId())
-                    .userId(bookRequest.getUserId())
-                    .bookId(bookRequest.getBookId())
-                    .createdAt(Instant.now())
-                    .build();
-
-            messageRepository.save(message);
-            bookRequestRepository.save(bookRequest);
         }
+
+        Message message = Message.builder()
+                .message(request.getMessage() + "\nHence Request was " + request.getApprovalStatus())
+                .adminId(UserUtil.getLoggedInUser().get().getUserId())
+                .userId(bookRequest.getUserId())
+                .bookId(bookRequest.getBookId())
+                .createdAt(Instant.now())
+                .build();
+
+        messageRepository.save(message);
+        bookRequestRepository.save(bookRequest);
 
         return GenericResponse.builder()
                 .message("Request has been processed and message has been sent")
