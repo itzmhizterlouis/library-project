@@ -266,26 +266,37 @@ public class LibraryService {
 
         BookRequest bookRequest = bookRequestRepository.findByBookRequestId(bookRequestId).orElseThrow(BookRequestNotFoundException::new);
 
+        Message message;
+
         if (request.getApprovalStatus().equals(ApprovalStatus.REJECTED)) {
 
             bookRequestRepository.delete(bookRequest);
+
+            message = Message.builder()
+                    .message(request.getMessage() + "\nHence Request was " + request.getApprovalStatus())
+                    .adminId(UserUtil.getLoggedInUser().get().getUserId())
+                    .userId(bookRequest.getUserId())
+                    .bookId(bookRequest.getBookId())
+                    .createdAt(Instant.now())
+                    .build();
         }
 
         else {
             bookRequest.setStatus(request.getApprovalStatus());
 
+            message = Message.builder()
+                    .message(request.getMessage() + "\nHence Request was " + request.getApprovalStatus())
+                    .adminId(UserUtil.getLoggedInUser().get().getUserId())
+                    .userId(bookRequest.getUserId())
+                    .bookId(bookRequest.getBookId())
+                    .createdAt(Instant.now())
+                    .build();
+
+
+            bookRequestRepository.save(bookRequest);
         }
 
-        Message message = Message.builder()
-                .message(request.getMessage() + "\nHence Request was " + request.getApprovalStatus())
-                .adminId(UserUtil.getLoggedInUser().get().getUserId())
-                .userId(bookRequest.getUserId())
-                .bookId(bookRequest.getBookId())
-                .createdAt(Instant.now())
-                .build();
-
         messageRepository.save(message);
-        bookRequestRepository.save(bookRequest);
 
         return GenericResponse.builder()
                 .message("Request has been processed and message has been sent")
